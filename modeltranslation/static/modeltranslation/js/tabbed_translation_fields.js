@@ -93,7 +93,7 @@ var google, django, gettext;
         function createMainSwitch(tabs) {
             var grouped_translations = getGroupedTranslationFields(),
               unique_languages = [],
-              select = $('<select>');
+              select = $('<select class="language-selector">');
             $.each(grouped_translations, function (name, languages) {
                 $.each(languages, function (lang, el) {
                     if ($.inArray(lang, unique_languages) < 0) {
@@ -114,6 +114,8 @@ var google, django, gettext;
 
         if ($('body').hasClass('change-form')) {
             createMainSwitch(createTabs());
+
+            $('select.language-selector').val($('html').attr('lang'));
         }
     });
 }());
