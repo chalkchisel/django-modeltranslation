@@ -124,7 +124,7 @@ var google, django, gettext;
                   optionToSelect = $(el).attr('value');
             });
 
-            $('select.language-selector').val(optionToSelect);
+            $('select.language-selector').val(optionToSelect).trigger('change');
         }
     });
 }());
