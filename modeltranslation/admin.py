@@ -6,7 +6,7 @@ from django.contrib.admin.options import BaseModelAdmin, InlineModelAdmin
 from django.contrib.contenttypes import generic
 from django.utils import translation
 
-from modeltranslation.settings import DEFAULT_LANGUAGE
+from modeltranslation.settings import DEFAULT_LANGUAGE, AVAILABLE_LANGUAGES
 from modeltranslation.translator import translator
 from modeltranslation.utils import (get_translation_fields,
                                     build_localized_fieldname,
@@ -123,11 +123,31 @@ class TranslationBaseModelAdmin(BaseModelAdmin):
 
     def _patch_prepopulated_fields(self):
         if self.prepopulated_fields:
-            prepopulated_fields_new = dict(self.prepopulated_fields)
+            # prepopulated_fields_new = dict(self.prepopulated_fields)
+            # for (k, v) in self.prepopulated_fields.items():
+            #     if v[0] in self.trans_opts.fields:
+            #         translation_fields = get_translation_fields(v[0])
+            #         prepopulated_fields_new[k] = tuple([translation_fields[0]])
+            prepopulated_fields_new = {}
             for (k, v) in self.prepopulated_fields.items():
-                if v[0] in self.trans_opts.fields:
-                    translation_fields = get_translation_fields(v[0])
-                    prepopulated_fields_new[k] = tuple([translation_fields[0]])
+                if k in self.trans_opts.fields:
+                    translation_fields = [(l, build_localized_fieldname(k, l)) for l in AVAILABLE_LANGUAGES]
+                    new_keys = tuple(translation_fields)
+                else:
+                    new_keys = ((None, k),)
+                for lang, new_key in new_keys:
+                    languages = AVAILABLE_LANGUAGES
+                    if lang:
+                        languages = [lang]
+                    new_vals = []
+                    for val in v:
+                        if val in self.trans_opts.fields:
+                            translation_fields = [build_localized_fieldname(val, l) for l in languages]
+                            new_vals.extend(translation_fields)
+                        else:
+                            new_vals.append(val)
+                    new_vals = tuple(new_vals)
+                    prepopulated_fields_new[new_key] = new_vals
             self.prepopulated_fields = prepopulated_fields_new
 
     def _do_get_form_or_formset(self, **kwargs):
