@@ -115,7 +115,16 @@ var google, django, gettext;
         if ($('body').hasClass('change-form')) {
             createMainSwitch(createTabs());
 
-            $('select.language-selector').val($('html').attr('lang'));
+            var currentLanguage = $('html').attr('lang');
+
+            var optionToSelect = 0;
+
+            $('select.language-selector option').each(function(i, el) {
+                if($(el).html() == currentLanguage)
+                  optionToSelect = $(el).attr('value');
+            });
+
+            $('select.language-selector').val(optionToSelect);
         }
     });
 }());
